@@ -24,6 +24,32 @@ stringstream execute(string cmd){
 	return ss;
 }
 
+vector<string> split(std::string src, std::string pattern)
+{
+	std::regex ws_re(pattern);
+	vector<string> v(sregex_token_iterator(
+				 src.begin(),
+				 src.end(),
+				 ws_re,
+				 -1),
+			 sregex_token_iterator());
+	return v;
+}
+
+class record_t
+{
+	record_t(string tid)
+		:tag_id(tid), count(0)
+		{}
+	string tag_id;
+	int count;
+	vector<string> time_list;
+	void add_time(string time) {
+		time_list.push_back(time);
+		count++;
+	}
+};
+
 
 int main (int argc, char** argv)
 {
@@ -36,6 +62,15 @@ int main (int argc, char** argv)
 	string fname(argv[1]);
 	string cmd = string("egrep -A 2 \"gw_common.c\" ") + fname;
 	auto buffer = execute(cmd);
-	cout << "read size = " << buffer.str().size() << endl;
+	auto result = split(buffer.str(), "--");
+	for (auto&& s: result) {
+		std::regex hhmmss("\\d\\d:\\d\\d:\\d\\d");
+		std::smatch m;
+		std::ssub_match sm;
+		regex_search(s, m, hhmmss);
+		sm = m[0];
+		cout << sm.str() << endl;
+	}
+
 	return 0;
 }

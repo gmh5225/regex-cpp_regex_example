@@ -39,6 +39,8 @@ vector<string> split(std::string src, std::string pattern)
 class record_t
 {
 public:
+	record_t()
+		{}
 	record_t(string tid)
 		:tag_id(tid), count(0)
 		{}
@@ -82,21 +84,22 @@ int main (int argc, char** argv)
 		time = m[0];
 		std::regex tag("(16 04 |16 07 )((\\w\\w\\s){5})");
 		std::smatch m2;
-		std::ssub_match tid;
 		regex_search(s, m2, tag);
-		tid = m2[0];
-
-		if (tid.str().size() != 0) {
-			// m2[2] is tag id
-			dump_smatch(m2);
-			string tag_id = m2[2].str();
+		string tag_id = m2[0].str();
+		if (tag_id.size() != 0) {
+			//dump_smatch(m2);
 			// test if tag id existed in map
-			//if (!statistic.count(tag_id))
-			//	statistic.insert({tag_id, record_t{tag_id}});
-
-			//statistic[tag_id].add_time(time.str());
+			if (!statistic.count(tag_id)) {
+				statistic.insert({tag_id, record_t{tag_id}});
+			}
+			record_t& r = statistic[tag_id];
+			r.add_time(time.str());
 		}
 	}
-
+	cout << "statistic : " << statistic.size() << " entries." << endl;
+	for (auto it = statistic.begin(); it != statistic.end(); ++it) {
+		record_t r = it->second;
+		cout << r.tag_id << " : " << r.time_list.size() << endl;
+	}
 	return 0;
 }

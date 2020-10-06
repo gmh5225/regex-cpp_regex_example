@@ -4,6 +4,7 @@
 #include <map>
 #include <sstream>
 #include <regex>
+#include <iomanip>
 
 using namespace std;
 
@@ -76,18 +77,24 @@ int main (int argc, char** argv)
 	string cmd = string("egrep -A 2 \"gw_common.c\" ") + fname;
 	auto buffer = execute(cmd);
 	auto result = split(buffer.str(), "--");
-	for (auto&& s: result) {
+
+	for (auto blk_iter = result.begin(); blk_iter != result.end(); blk_iter++) {
+		// search time stamp
 		std::regex hhmmss("\\d\\d:\\d\\d:\\d\\d");
 		std::smatch m;
 		std::ssub_match time;
-		regex_search(s, m, hhmmss);
+		regex_search(*blk_iter, m, hhmmss);
 		time = m[0];
+
+		// search tag id pattern
 		std::regex tag("(16 04 |16 07 )((\\w\\w\\s){5})");
 		std::smatch m2;
-		regex_search(s, m2, tag);
+		regex_search(*blk_iter, m2, tag);
 		string tag_id = m2[0].str();
+
+		// add valid tag_id to statistic
 		if (tag_id.size() != 0) {
-			//dump_smatch(m2);
+			// dump_smatch(m2);
 			// test if tag id existed in map
 			if (!statistic.count(tag_id)) {
 				statistic.insert({tag_id, record_t{tag_id}});
@@ -95,8 +102,12 @@ int main (int argc, char** argv)
 			record_t& r = statistic[tag_id];
 			r.add_time(time.str());
 		}
+		// print progress
+		int percent = distance(result.begin(), blk_iter) * 100 / result.size();
+		cout << '\r'
+		     << std::setw(3) << percent << '%' << flush;
 	}
-	cout << "statistic : " << statistic.size() << " entries." << endl;
+	cout << endl << "statistic : " << statistic.size() << " entries." << endl;
 	for (auto it = statistic.begin(); it != statistic.end(); ++it) {
 		record_t r = it->second;
 		cout << r.tag_id << " : " << r.time_list.size() << endl;

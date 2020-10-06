@@ -5,6 +5,7 @@
 #include <sstream>
 #include <regex>
 #include <iomanip>
+#include <algorithm>
 
 using namespace std;
 
@@ -108,9 +109,21 @@ int main (int argc, char** argv)
 		     << std::setw(3) << percent << '%' << flush;
 	}
 	cout << endl << "statistic : " << statistic.size() << " entries." << endl;
+
+	// move map to vector
+	vector<pair<string, record_t>> vec;
 	for (auto it = statistic.begin(); it != statistic.end(); ++it) {
-		record_t r = it->second;
-		cout << r.tag_id << " : " << r.time_list.size() << endl;
+		vec.push_back(*it);
 	}
+	// sort vector
+	sort(vec.begin(),
+	     vec.end(),
+	     [](pair<string, record_t> x, pair<string, record_t> y) {
+		     return x.second.count > y.second.count;
+	     });
+	for (auto it = vec.begin(); it != vec.end(); ++it) {
+		cout << it->first << ": " << it->second.count << endl;
+	}
+
 	return 0;
 }

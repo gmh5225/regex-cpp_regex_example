@@ -17,10 +17,12 @@ INCFLAGS +=  -I/usr/local/opt/llvm/include
 .PHONY:	clean $(TARGET)
 # Objects generation
 $(ODIR)/%.o:    $(SDIR)/%.cpp
+	mkdir -p $(ODIR)
 	$(CXX) $(CXXFLAGS) $(INCFLAGS) -c -MMD $< -o $@
 
 # Generating dependencies
 $(ODIR)/%.d:    $(SDIR)/%.cpp
+	mkdir -p $(ODIR)
 	$(CXX) -M $(CXXFLAGS) $(INCFLAGS) $< > $@
 
 
